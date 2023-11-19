@@ -27,7 +27,7 @@ spec:
         - name: cgroup
           mountPath: /sys/fs/cgroup
         - name: lxcfs
-          mountPath: /var/lib/lxcfs
+          mountPath: /var/lib/lxc/lxcfs
           mountPropagation: Bidirectional
         - name: usr-local
           mountPath: /usr/local
@@ -40,5 +40,5 @@ spec:
           path: /usr/local
       - name: lxcfs
         hostPath:
-          path: /var/lib/lxcfs
+          path: /var/lib/lxc/lxcfs
           type: DirectoryOrCreate

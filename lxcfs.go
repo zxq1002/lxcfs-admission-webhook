@@ -33,7 +33,11 @@ var (
 // -v /var/lib/lxcfs/proc/uptime:/proc/uptime:rw
 // -v /var/lib/lxcfs/proc/loadavg:/proc/loadavg:rw
 var volumeMountsTemplate = []corev1.VolumeMount{
-
+	{
+		Name:      "var-lib-lxc",
+		MountPath: "/var/lib/lxc",
+		MountPropagation: corev1.MountPropagationHostToContainer,
+	},
 	{
 		Name:      "lxcfs-proc-cpuinfo",
 		MountPath: "/proc/cpuinfo",
@@ -69,10 +73,18 @@ var volumeMountsTemplate = []corev1.VolumeMount{
 }
 var volumesTemplate = []corev1.Volume{
 	{
+                Name: "var-lib-lxc",
+                VolumeSource: corev1.VolumeSource{
+                        HostPath: &corev1.HostPathVolumeSource{
+                                Path: "/var/lib/lxc",
+                        },
+                },
+        },
+	{
 		Name: "lxcfs-proc-cpuinfo",
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: "/var/lib/lxcfs/proc/cpuinfo",
+				Path: "/var/lib/lxc/lxcfs/proc/cpuinfo",
 			},
 		},
 	},
@@ -80,7 +92,7 @@ var volumesTemplate = []corev1.Volume{
 		Name: "lxcfs-proc-diskstats",
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: "/var/lib/lxcfs/proc/diskstats",
+				Path: "/var/lib/lxc/lxcfs/proc/diskstats",
 			},
 		},
 	},
@@ -88,7 +100,7 @@ var volumesTemplate = []corev1.Volume{
 		Name: "lxcfs-proc-meminfo",
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: "/var/lib/lxcfs/proc/meminfo",
+				Path: "/var/lib/lxc/lxcfs/proc/meminfo",
 			},
 		},
 	},
@@ -96,7 +108,7 @@ var volumesTemplate = []corev1.Volume{
 		Name: "lxcfs-proc-stat",
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: "/var/lib/lxcfs/proc/stat",
+				Path: "/var/lib/lxc/lxcfs/proc/stat",
 			},
 		},
 	},
@@ -104,7 +116,7 @@ var volumesTemplate = []corev1.Volume{
 		Name: "lxcfs-proc-swaps",
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: "/var/lib/lxcfs/proc/swaps",
+				Path: "/var/lib/lxc/lxcfs/proc/swaps",
 			},
 		},
 	},
@@ -112,7 +124,7 @@ var volumesTemplate = []corev1.Volume{
 		Name: "lxcfs-proc-uptime",
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: "/var/lib/lxcfs/proc/uptime",
+				Path: "/var/lib/lxc/lxcfs/proc/uptime",
 			},
 		},
 	},
@@ -120,7 +132,7 @@ var volumesTemplate = []corev1.Volume{
 		Name: "lxcfs-proc-loadavg",
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: "/var/lib/lxcfs/proc/loadavg",
+				Path: "/var/lib/lxc/lxcfs/proc/loadavg",
 			},
 		},
 	},
@@ -128,7 +140,7 @@ var volumesTemplate = []corev1.Volume{
 		Name: "lxcfs-sys-devices-system-cpu-online",
 		VolumeSource: corev1.VolumeSource{
 			HostPath: &corev1.HostPathVolumeSource{
-				Path: "/var/lib/lxcfs/sys/devices/system/cpu/online",
+				Path: "/var/lib/lxc/lxcfs/sys/devices/system/cpu/online",
 			},
 		},
 	},
