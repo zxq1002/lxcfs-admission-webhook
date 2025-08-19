@@ -6,8 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang/glog"
-	"k8s.io/api/admission/v1beta1"
-
+	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -25,6 +24,10 @@ var (
 	requireAnnotation bool
 )
 
+func mountPropagationPtr(m corev1.MountPropagationMode) *corev1.MountPropagationMode {
+	return &m
+}
+
 // -v /var/lib/lxcfs/proc/cpuinfo:/proc/cpuinfo:rw
 // -v /var/lib/lxcfs/proc/diskstats:/proc/diskstats:rw
 // -v /var/lib/lxcfs/proc/meminfo:/proc/meminfo:rw
@@ -34,9 +37,9 @@ var (
 // -v /var/lib/lxcfs/proc/loadavg:/proc/loadavg:rw
 var volumeMountsTemplate = []corev1.VolumeMount{
 	{
-		Name:      "var-lib-lxc",
-		MountPath: "/var/lib/lxc",
-		MountPropagation: corev1.MountPropagationHostToContainer,
+		Name:             "var-lib-lxc",
+		MountPath:        "/var/lib/lxc",
+		MountPropagation: mountPropagationPtr(corev1.MountPropagationHostToContainer),
 	},
 	{
 		Name:      "lxcfs-proc-cpuinfo",
@@ -147,7 +150,7 @@ var volumesTemplate = []corev1.Volume{
 }
 
 // main mutation process
-func (whsvr *WebhookServer) mutatePod(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
+func (whsvr *WebhookServer) mutatePod(ar *admissionv1.AdmissionReview) *admissionv1.AdmissionResponse {
 	req := ar.Request
 	var (
 		objectMeta                      *metav1.ObjectMeta
@@ -161,7 +164,7 @@ func (whsvr *WebhookServer) mutatePod(ar *v1beta1.AdmissionReview) *v1beta1.Admi
 
 	if err := json.Unmarshal(req.Object.Raw, &pod); err != nil {
 		glog.Errorf("Could not unmarshal raw object to pod: %v", err)
-		return &v1beta1.AdmissionResponse{
+		return &admissionv1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
 			},
@@ -171,24 +174,24 @@ func (whsvr *WebhookServer) mutatePod(ar *v1beta1.AdmissionReview) *v1beta1.Admi
 
 	if !mutationRequired(ignoredNamespaces, objectMeta) {
 		glog.Infof("Skipping validation for %s/%s due to policy check", resourceNamespace, resourceName)
-		return &v1beta1.AdmissionResponse{
+		return &admissionv1.AdmissionResponse{
 			Allowed: true,
 		}
 	}
 
 	patchBytes, err := createPodPatch(&pod)
 	if err != nil {
-		return &v1beta1.AdmissionResponse{
+		return &admissionv1.AdmissionResponse{
 			Result: &metav1.Status{
 				Message: err.Error(),
 			},
 		}
 	}
 
-	patchType := v1beta1.PatchTypeJSONPatch
+	patchType := admissionv1.PatchTypeJSONPatch
 
 	glog.Infof("AdmissionResponse: patch=%v\n", string(patchBytes))
-	return &v1beta1.AdmissionResponse{
+	return &admissionv1.AdmissionResponse{
 		UID:       req.UID,
 		Allowed:   true,
 		Patch:     patchBytes,
@@ -272,8 +275,8 @@ func createPodPatch(pod *corev1.Pod) ([]byte, error) {
 }
 
 // validate deployments and services
-func (whsvr *WebhookServer) validatePod(ar *v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
-	return &v1beta1.AdmissionResponse{
+func (whsvr *WebhookServer) validatePod(ar *admissionv1.AdmissionReview) *admissionv1.AdmissionResponse {
+	return &admissionv1.AdmissionResponse{
 		Allowed: true,
 	}
 }
